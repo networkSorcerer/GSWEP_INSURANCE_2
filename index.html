@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>보험가입증명서 생성 시스템</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            color: #2c3e50;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.8;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .card h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            display: inline-block;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60, #229954);
+        }
+
+        .btn-success:hover {
+            box-shadow: 0 6px 20px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+        }
+
+        .btn-warning:hover {
+            box-shadow: 0 6px 20px rgba(243, 156, 18, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .upload-area {
+            border: 2px dashed #3498db;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            background: rgba(52, 152, 219, 0.05);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: #2980b9;
+            background: rgba(52, 152, 219, 0.1);
+        }
+
+        .upload-area.dragover {
+            border-color: #27ae60;
+            background: rgba(39, 174, 96, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            color: #3498db;
+            margin-bottom: 15px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+        }
+
+        .alert-success {
+            background-color: rgba(212, 237, 218, 0.9);
+            border-left-color: #28a745;
+            color: #155724;
+        }
+
+        .alert-error {
+            background-color: rgba(248, 215, 218, 0.9);
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+
+        .alert-info {
+            background-color: rgba(209, 236, 241, 0.9);
+            border-left-color: #17a2b8;
+            color: #0c5460;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .certificate-preview {
+            background: white;
+            border: 2px solid #3498db;
+            border-radius: 10px;
+            padding: 30px;
+            margin-top: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .certificate-header {
+            text-align: center;
+            border-bottom: 2px solid #2c3e50;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .certificate-header h1 {
+            font-size: 2.2em;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .info-table th,
+        .info-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .info-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            width: 30%;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .tab-container {
+            margin-bottom: 20px;
+        }
+
+        .tab-buttons {
+            display: flex;
+            border-bottom: 2px solid #e1e5e9;
+            margin-bottom: 20px;
+        }
+
+        .tab-button {
+            background: none;
+            border: none;
+            padding: 12px 24px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #7f8c8d;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button.active {
+            color: #3498db;
+            border-bottom-color: #3498db;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .history-item {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .history-item h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .history-meta {
+            color: #7f8c8d;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+            
+            .tab-buttons {
+                flex-wrap: wrap;
+            }
+            
+            .tab-button {
+                flex: 1;
+                min-width: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛡️ 보험가입증명서 생성 시스템</h1>
+            <p>AI 기반 증권 분석으로 간편하게 가입증명서를 생성하세요</p>
+        </div>
+
+        <!-- 로그인 섹션 -->
+        <div id="loginSection" class="card">
+            <div class="tab-container">
+                <div class="tab-buttons">
+                    <button class="tab-button active" onclick="switchTab('login')">로그인</button>
+                    <button class="tab-button" onclick="switchTab('register')">회원가입</button>
+                </div>
+
+                <div id="loginTab" class="tab-content active">
+                    <h2>로그인</h2>
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label for="loginEmail">이메일</label>
+                            <input type="email" id="loginEmail" required placeholder="example@email.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword">비밀번호</label>
+                            <input type="password" id="loginPassword" required>
+                        </div>
+                        <button type="submit" class="btn">로그인</button>
+                    </form>
+                </div>
+
+                <div id="registerTab" class="tab-content">
+                    <h2>회원가입</h2>
+                    <form id="registerForm">
+                        <div class="form-group">
+                            <label for="registerName">이름</label>
+                            <input type="text" id="registerName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerEmail">이메일</label>
+                            <input type="email" id="registerEmail" required placeholder="example@email.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPassword">비밀번호</label>
+                            <input type="password" id="registerPassword" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPasswordConfirm">비밀번호 확인</label>
+                            <input type="password" id="registerPasswordConfirm" required>
+                        </div>
+                        <button type="submit" class="btn btn-success">회원가입</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 메인 애플리케이션 섹션 -->
+        <div id="mainSection" class="hidden">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <div>
+                        <span id="userWelcome"></span>
+                    </div>
+                    <button class="btn btn-danger" onclick="logout()">로그아웃</button>
+                </div>
+            </div>
+
+            <!-- 증권 업로드 섹션 -->
+            <div class="card">
+                <h2>📄 보험증권 업로드</h2>
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📁</div>
+                    <p><strong>보험증권 PDF 파일을 여기에 드래그하거나 클릭하여 선택하세요</strong></p>
+                    <p>지원 형식: PDF</p>
+                    <input type="file" id="fileInput" accept=".pdf" style="display: none;">
+                </div>
+                
+                <div class="loading" id="uploadLoading">
+                    <div class="spinner"></div>
+                    <p>Gemini AI가 증권을 분석하고 있습니다...</p>
+                </div>
+
+                <div id="uploadResult"></div>
+            </div>
+
+            <!-- 정보 편집 섹션 -->
+            <div id="editSection" class="card hidden">
+                <h2>✏️ 증권 정보 편집</h2>
+                <form id="editForm">
+                    <div class="two-column">
+                        <div>
+                            <div class="form-group">
+                                <label for="policyNumber">증권번호</label>
+                                <input type="text" id="policyNumber" name="policyNumber">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="insuredName">피보험자명</label>
+                                <input type="text" id="insuredName" name="insuredName">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="insuranceCompany">보험회사</label>
+                                <input type="text" id="insuranceCompany" name="insuranceCompany">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="insuranceType">보험종목</label>
+                                <input type="text" id="insuranceType" name="insuranceType">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="form-group">
+                                <label for="insurancePeriodStart">보험기간 시작일</label>
+                                <input type="date" id="insurancePeriodStart" name="insurancePeriodStart">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="insurancePeriodEnd">보험기간 종료일</label>
+                                <input type="date" id="insurancePeriodEnd" name="insurancePeriodEnd">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="coverageLimit">보상한도액</label>
+                                <input type="text" id="coverageLimit" name="coverageLimit">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="address">주소</label>
+                        <textarea id="address" name="address" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="coverageDetails">주요 보장내용</label>
+                        <textarea id="coverageDetails" name="coverageDetails" rows="5" placeholder="Gemini AI가 추출한 보장내용을 확인하고 필요시 수정하세요."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="additionalInfo">추가 정보</label>
+                        <textarea id="additionalInfo" name="additionalInfo" rows="3" placeholder="특약사항, 면책조항, 기타 중요 정보를 입력하세요."></textarea>
+                    </div>
+                    
+                    <button type="button" class="btn" onclick="generatePreview()">📋 미리보기 생성</button>
+                    <button type="button" class="btn btn-warning" onclick="showUploadSection()">이전 단계로</button>
+                </form>
+            </div>
+
+            <!-- 미리보기 섹션 -->
+            <div id="previewSection" class="card hidden">
+                <h2>📋 가입증명서 미리보기</h2>
+                <div id="certificatePreview"></div>
+                
+                <div style="margin-top: 20px;">
+                    <button class="btn btn-success" onclick="generateCertificate()">📄 증명서 생성 및 다운로드</button>
+                    <button class="btn" onclick="showEditSection()">수정하기</button>
+                    <button class="btn btn-warning" onclick="showHistory()">📂 발급 내역 보기</button>
+                </div>
+            </div>
+
+            <!-- 발급 내역 섹션 -->
+            <div id="historySection" class="card hidden">
+                <h2>📂 발급 내역</h2>
+                <div id="historyList"></div>
+                <button class="btn" onclick="showUploadSection()">새 증명서 생성</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let extractedData = null;
+        let certificateData = null;
+
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeUpload();
+            initializeForms();
+        });
+
+        // 탭 전환
+        function switchTab(tabName) {
+            // 탭 버튼 활성화 상태 변경
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[onclick="switchTab('${tabName}')"]`).classList.add('active');
+            
+            // 탭 컨텐츠 표시/숨김
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(tabName + 'Tab').classList.add('active');
+        }
+
+        // 폼 초기화
+        function initializeForms() {
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            document.getElementById('registerForm').addEventListener('submit', handleRegister);
+        }
+
+        // 로그인 처리
+        function handleLogin(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                showAlert('이메일과 비밀번호를 입력해주세요.', 'error');
+                return;
+            }
+            
+            showLoading('로그인 중...');
+            
+            google.script.run
+                .withSuccessHandler(handleLoginSuccess)
+                .withFailureHandler(handleError)
+                .authenticateUser(email, password);
+        }
+
+        function handleLoginSuccess(result) {
+            hideLoading();
+            
+            if (result.success) {
+                currentUser = result.user;
+                document.getElementById('userWelcome').textContent = `👤 ${currentUser.name}님 환영합니다! (${currentUser.email})`;
+                
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('mainSection').classList.remove('hidden');
+                
+                showAlert('로그인 성공!', 'success');
+            } else {
+                showAlert(result.message, 'error');
+            }
+        }
+
+        // 회원가입 처리
+        function handleRegister(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
+            
+            if (!name || !email || !password || !passwordConfirm) {
+                showAlert('모든 필드를 입력해주세요.', 'error');
+                return;
+            }
+            
+            if (password !== passwordConfirm) {
+                showAlert('비밀번호가 일치하지 않습니다.', 'error');
+                return;
+            }
+            
+            showLoading('회원가입 중...');
+            
+            google.script.run
+                .withSuccessHandler(handleRegisterSuccess)
+                .withFailureHandler(handleError)
+                .registerUser(email, password, name);
+        }
+
+        function handleRegisterSuccess(result) {
+            hideLoading();
+            
+            if (result.success) {
+                showAlert(result.message, 'success');
+                switchTab('login');
+                document.getElementById('registerForm').reset();
+            } else {
+                showAlert(result.message, 'error');
+            }
+        }
+
+        // 로그아웃
+        function logout() {
+            currentUser = null;
+            extractedData = null;
+            certificateData = null;
+            
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('mainSection').classList.add('hidden');
+            
+            // 폼 초기화
+            document.getElementById('loginForm').reset();
+            document.getElementById('registerForm').reset();
+            
+            showAlert('로그아웃되었습니다.', 'info');
+        }
+
+        // 파일 업로드 초기화
+        function initializeUpload() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+
+            uploadArea.addEventListener('click', () => fileInput.click());
+            uploadArea.addEventListener('dragover', handleDragOver);
+            uploadArea.addEventListener('dragleave', handleDragLeave);
+            uploadArea.addEventListener('drop', handleDrop);
+            fileInput.addEventListener('change', handleFileSelect);
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('dragover');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                processFile(files[0]);
+            }
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                processFile(file);
+            }
+        }
+
+        // 파일 처리
+        function processFile(file) {
+            if (file.type !== 'application/pdf') {
+                showAlert('PDF 파일만 업로드 가능합니다.', 'error');
+                return;
+            }
+            
+            const loading = document.getElementById('uploadLoading');
+            const result = document.getElementById('uploadResult');
+            
+            loading.classList.add('show');
+            result.innerHTML = '';
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const fileBlob = Utilities.newBlob(e.target.result, file.type, file.name);
+                
+                google.script.run
+                    .withSuccessHandler(handleUploadSuccess)
+                    .withFailureHandler(handleUploadError)
+                    .processUploadedPDF(fileBlob, file.name, currentUser.email);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function handleUploadSuccess(response) {
+            const loading = document.getElementById('uploadLoading');
+            const result = document.getElementById('uploadResult');
+            
+            loading.classList.remove('show');
+
+            if (response.success) {
+                extractedData = response.data;
+                populateForm(response.data);
+                
+                result.innerHTML = '<div class="alert alert-success">✅ ' + response.message + '</div>';
+                showEditSection();
+            } else {
+                result.innerHTML = `<div class="alert alert-error">❌ 오류: ${response.error}</div>`;
+                if (response.rawResponse) {
+                    result.innerHTML += `<div class="alert alert-info">원본 응답: ${response.rawResponse}</div>`;
+                }
+            }
+        }
+
+        function handleUploadError(error) {
+            const loading = document.getElementById('uploadLoading');
+            const result = document.getElementById('uploadResult');
+            
+            loading.classList.remove('show');
+            result.innerHTML = `<div class="alert alert-error">❌ 파일 처리 중 오류가 발생했습니다: ${error}</div>`;
+        }
+
+        // 폼 데이터 채우기
+        function populateForm(data) {
+            document.getElementById('policyNumber').value = data.policy_number || '';
+            document.getElementById('insuredName').value = data.insured_name || '';
+            document.getElementById('insuranceCompany').value = data.insurance_company || '';
+            document.getElementById('insuranceType').value = data.insurance_type || '';
+            document.getElementById('insurancePeriodStart').value = data.insurance_period_start || '';
+            document.getElementById('insurancePeriodEnd').value = data.insurance_period_end || '';
+            document.getElementById('coverageLimit').value = data.coverage_limit || '';
+            document.getElementById('address').value = data.address || '';
+            document.getElementById('coverageDetails').value = data.coverage_details || '';
+            document.getElementById('additionalInfo').value = '';
+        }
+
+        // 섹션 표시/숨김 함수들
+        function showUploadSection() {
+            document.querySelectorAll('.card').forEach(card => {
+                if (card.id !== 'loginSection') {
+                    card.classList.add('hidden');
+                }
+            });
+            document.querySelector('.card:nth-child(3)').classList.remove('hidden'); // 업로드 섹션
+        }
+
+        function showEditSection() {
+            document.getElementById('editSection').classList.remove('hidden');
+            document.getElementById('previewSection').classList.add('hidden');
+            document.getElementById('historySection').classList.add('hidden');
+        }
+
+        function showPreviewSection() {
+            document.getElementById('editSection').classList.add('hidden');
+            document.getElementById('previewSection').classList.remove('hidden');
+            document.getElementById('historySection').classList.add('hidden');
+        }
+
+        // 미리보기 생성
+        function generatePreview() {
+            certificateData = getFormData();
+            
+            const previewHtml = `
+                <div class="certificate-preview">
+                    <div class="certificate-header">
+                        <h1>보험가입증명서</h1>
+                        <div style="font-size: 16px; color: #7f8c8d; margin-top: 10px;">Insurance Coverage Certificate</div>
+                    </div>
+                    
+                    <table class="info-table">
+                        <tr>
+                            <th>증권번호</th>
+                            <td>${certificateData.policy_number || '정보 없음'}</td>
+                        </tr>
+                        <tr>
+                            <th>피보험자명</th>
+                            <td>${certificateData.insured_name || '정보 없음'}</td>
+                        </tr>
+                        <tr>
+                            <th>보험회사</th>
+                            <td>${certificateData.insurance_company || '정보 없음'}</td>
+                        </tr>
+                        <tr>
+                            <th>보험종목</th>
+                            <td>${certificateData.insurance_type || '정보 없음'}</td>
+                        </tr>
+                        <tr>
+                            <th>보험기간</th>
+                            <td>${certificateData.insurance_period_start || '정보 없음'} ~ ${certificateData.insurance_period_end || '정보 없음'}</td>
+                        </tr>
+                        <tr>
+                            <th>보상한도액</th>
+                            <td>${certificateData.coverage_limit || '정보 없음'}</td>
+                        </tr>
+                        <tr>
+                            <th>주소</th>
+                            <td>${certificateData.address || '정보 없음'}</td>
+                        </tr>
+                    </table>
+                    
+                    <h3 style="color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 5px; margin-bottom: 15px;">보장내용</h3>
+                    <div style="background: #f8f9fa; padding: 15px; border-left: 4px solid #3498db; margin-bottom: 20px; white-space: pre-line;">
+                        ${certificateData.coverage_details || '보장내용 정보가 없습니다.'}
+                    </div>
+                    
+                    ${certificateData.additional_info ? `
+                    <h3 style="color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 5px; margin-bottom: 15px;">추가 정보</h3>
+                    <div style="background: #f8f9fa; padding: 15px; border-left: 4px solid #3498db; margin-bottom: 20px; white-space: pre-line;">
+                        ${certificateData.additional_info}
+                    </div>
+                    ` : ''}
+                    
+                    <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #bdc3c7;">
+                        <p>위와 같이 보험에 가입되어 있음을 증명합니다.</p>
+                        <p style="font-size: 18px; font-weight: bold; margin-top: 20px;">${certificateData.insurance_company || '[보험회사명]'}</p>
+                    </div>
+                    
+                    <div style="text-align: right; margin-top: 30px; font-size: 14px; color: #7f8c8d;">
+                        <p>발급일: ${new Date().toLocaleDateString('ko-KR')}</p>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('certificatePreview').innerHTML = previewHtml;
+            showPreviewSection();
+        }
+
+        // 폼 데이터 수집
+        function getFormData() {
+            return {
+                policy_number: document.getElementById('policyNumber').value,
+                insured_name: document.getElementById('insuredName').value,
+                insurance_company: document.getElementById('insuranceCompany').value,
+                insurance_type: document.getElementById('insuranceType').value,
+                insurance_period_start: document.getElementById('insurancePeriodStart').value,
+                insurance_period_end: document.getElementById('insurancePeriodEnd').value,
+                coverage_limit: document.getElementById('coverageLimit').value,
+                address: document.getElementById('address').value,
+                coverage_details: document.getElementById('coverageDetails').value,
+                additional_info: document.getElementById('additionalInfo').value
+            };
+        }
+
+        // 증명서 생성
+        function generateCertificate() {
+            if (!certificateData) {
+                showAlert('먼저 미리보기를 생성해주세요.', 'error');
+                return;
+            }
+            
+            showLoading('증명서를 생성하고 있습니다...');
+            
+            google.script.run
+                .withSuccessHandler(handleCertificateSuccess)
+                .withFailureHandler(handleError)
+                .generateCertificate(certificateData, currentUser.email);
+        }
+
+        function handleCertificateSuccess(result) {
+            hideLoading();
+            
+            if (result.success) {
+                showAlert('증명서가 성공적으로 생성되었습니다!', 'success');
+                
+                // 다운로드 링크 생성
+                const downloadLink = document.createElement('a');
+                downloadLink.href = `https://drive.google.com/file/d/${result.fileId}/view`;
+                downloadLink.target = '_blank';
+                downloadLink.textContent = '📥 증명서 다운로드';
+                downloadLink.className = 'btn btn-success';
+                downloadLink.style.marginTop = '10px';
+                
+                const alertDiv = document.querySelector('.alert-success');
+                if (alertDiv) {
+                    alertDiv.appendChild(document.createElement('br'));
+                    alertDiv.appendChild(downloadLink);
+                }
+            } else {
+                showAlert(`증명서 생성 중 오류가 발생했습니다: ${result.error}`, 'error');
+            }
+        }
+
+        // 발급 내역 보기
+        function showHistory() {
+            showLoading('발급 내역을 불러오고 있습니다...');
+            
+            google.script.run
+                .withSuccessHandler(handleHistorySuccess)
+                .withFailureHandler(handleError)
+                .getUserCertificates(currentUser.email);
+        }
+
+        function handleHistorySuccess(result) {
+            hideLoading();
+            
+            document.getElementById('editSection').classList.add('hidden');
+            document.getElementById('previewSection').classList.add('hidden');
+            document.getElementById('historySection').classList.remove('hidden');
+            
+            const historyList = document.getElementById('historyList');
+            
+            if (result.success && result.certificates.length > 0) {
+                let historyHtml = '';
+                
+                result.certificates.forEach((cert, index) => {
+                    historyHtml += `
+                        <div class="history-item">
+                            <h4>증명서 #${index + 1} - ${cert.insured_name || '정보 없음'}</h4>
+                            <div class="history-meta">
+                                발급일: ${new Date(cert.created).toLocaleString('ko-KR')}
+                            </div>
+                            <div class="two-column">
+                                <div>
+                                    <p><strong>증권번호:</strong> ${cert.policy_number || '정보 없음'}</p>
+                                    <p><strong>보험회사:</strong> ${cert.insurance_company || '정보 없음'}</p>
+                                    <p><strong>보험종목:</strong> ${cert.insurance_type || '정보 없음'}</p>
+                                </div>
+                                <div>
+                                    <p><strong>보험기간:</strong> ${cert.insurance_period_start || '정보 없음'} ~ ${cert.insurance_period_end || '정보 없음'}</p>
+                                    <p><strong>보상한도액:</strong> ${cert.coverage_limit || '정보 없음'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                historyList.innerHTML = historyHtml;
+            } else {
+                historyList.innerHTML = '<div class="alert alert-info">발급된 증명서가 없습니다.</div>';
+            }
+        }
+
+        // 유틸리티 함수들
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            
+            // 기존 알림 제거
+            const existingAlerts = document.querySelectorAll('.alert');
+            existingAlerts.forEach(alert => alert.remove());
+            
+            // 새 알림 추가
+            const container = document.querySelector('.container');
+            container.insertBefore(alertDiv, container.firstChild.nextSibling);
+            
+            // 5초 후 자동 제거
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+
+        function showLoading(message) {
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = 'globalLoading';
+            loadingDiv.className = 'loading show';
+            loadingDiv.innerHTML = `
+                <div class="spinner"></div>
+                <p>${message}</p>
+            `;
+            
+            document.body.appendChild(loadingDiv);
+        }
+
+        function hideLoading() {
+            const loadingDiv = document.getElementById('globalLoading');
+            if (loadingDiv) {
+                loadingDiv.remove();
+            }
+        }
+
+        function handleError(error) {
+            hideLoading();
+            showAlert(`오류가 발생했습니다: ${error}`, 'error');
+            console.error('Error:', error);
+        }
+    </script>
+</body>
+</html>

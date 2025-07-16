@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: system-ui, sans-serif;
+  }
+
+  body {
+    @apply text-gray-900 bg-white;
+  }
+}
+
+@layer components {
+  .certificate-page {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto;
+    background: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+}
+
+@media print {
+  body {
+    margin: 0;
+    padding: 0;
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
+  }
+
+  .certificate-page {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    box-shadow: none;
+    page-break-after: always;
+  }
+
+  .print-hidden {
+    display: none !important;
+  }
+}
+
+/* 현대해상 브랜드 컬러 (새로운 로고 색상 반영) */
+:root {
+  --hyundai-orange: #ff7f00;
+  --hyundai-dark-blue: #002c5f;
+}
